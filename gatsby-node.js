@@ -3,6 +3,7 @@ const path = require("path");
 
 const CockpitService = require("./src/CockpitService");
 const CollectionItemNodeFactory = require("./src/CollectionItemNodeFactory");
+const SingletonItemNodeFactory = require("./src/SingletonItemNodeFactory");
 const {
   MARKDOWN_IMAGE_REGEXP_GLOBAL,
   MARKDOWN_ASSET_REGEXP_GLOBAL
@@ -16,7 +17,7 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
     configOptions.baseUrl,
     configOptions.token,
     configOptions.locales
-  );
+  );``
   const fileNodeFactory = new FileNodeFactory(createNode, store, cache);
   const markdownNodeFactory = new MarkdownNodeFactory(createNode);
 
@@ -69,6 +70,63 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
     collection.items.forEach(item => {
       nodeFactory.create(item);
     });
+  });
+
+
+
+
+
+
+
+
+
+  const singletons = await cockpit.getSingletons();
+  const singletonsImages = await cockpit.normalizeSingletonsImages(singletons);
+  const singletonsAssets = await cockpit.normalizeSingletonsAssets(singletons);
+  const singletonsMarkdowns = await cockpit.normalizeSingletonsMarkdowns(
+    singletons,
+    singletonsImages,
+    singletonsAssets
+  );
+
+  for (let path in singletonsImages) {
+    const imageNode = await fileNodeFactory.createImageNode(path);
+    singletonsImages[path] = {
+      localPath: copyFileToStaticFolder(imageNode),
+      id: imageNode.id
+    };
+  }
+
+  for (let path in singletonsAssets) {
+    const assetNode = await fileNodeFactory.createAssetNode(path);
+    singletonsAssets[path] = {
+      localPath: copyFileToStaticFolder(assetNode),
+      id: assetNode.id
+    };
+  }
+
+  for (let markdown in singletonsMarkdowns) {
+    const localMarkdown = updateAssetPathsWithLocalPaths(
+      updateImagePathsWithLocalPaths(markdown, singletonsImages),
+      singletonsAssets
+    );
+    const id = markdownNodeFactory.create(localMarkdown);
+    singletonsMarkdowns[markdown] = { id };
+  }
+
+  const singletonFactory = new SingletonItemNodeFactory(
+    createNode,
+    'singleton',
+    singletonsImages,
+    singletonsAssets,
+    singletonsMarkdowns
+  );
+  singletons.forEach(singleton => {
+    singletonFactory.create(singleton);
+
+    /*singleton.items.forEach(item => {
+      singletonFactory.create(item);
+    });*/
   });
 };
 

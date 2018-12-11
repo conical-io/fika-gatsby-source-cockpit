@@ -173,6 +173,161 @@ module.exports = class CockpitService {
 
     return markdowns;
   }
+
+
+
+
+
+
+
+  async getSingletonNames() {
+    return this.fetch("/singletons/listSingletons", METHODS.GET);
+  }
+
+  async getSingleton(name) {
+    const fields = await this.fetch(
+      `/singletons/get/${name}`,
+      METHODS.GET
+    );
+
+    const cockpitId = name;
+
+    var items = [];
+
+    var keys = Object.keys(fields);
+    for (var i = 0; i < keys.length; i++) {
+      if (fields[keys[i]]) {
+        items.push(createSingletonItem(keys[i], fields[keys[i]]));
+      }
+    }
+
+    /*for (let index = 0; index < this.locales.length; index++) {
+      const fields = await this.fetch(
+        `/singletons/get/${name}`,
+        METHODS.GET,
+        this.locales[index]
+      );
+
+      var keys = Object.keys(fields);
+      for (var i = 0; i < keys.length; i++) {
+        items.push(createSingletonItem(keys[i], fields[keys[i]], this.locales[index]));
+      }
+    }*/
+
+    return { items, name, cockpitId };
+  }
+
+  async getSingletons() {
+    const names = await this.getSingletonNames();
+
+    return Promise.all(names.map(name => this.getSingleton(name)));
+  }
+
+  normalizeSingletonsImages(singletons) {
+    const images = {};
+
+    singletons.forEach(singleton => {
+      singleton.items.forEach(item => {
+        console.log(item);
+        if (typeof item.value.path != 'undefined' && item.value.path) {
+          if (item.value.path.startsWith("/")) {
+            item.value = `${this.baseUrl}${item.value.path}`;
+          } else if (!item.value.path.startsWith("http")) {
+            item.value = `${this.baseUrl}/${item.value.path}`;
+          }
+        }
+
+
+
+        /*Object.keys(item)
+          .filter(
+            fieldName =>
+              item[fieldName].type === "image" ||
+              item[fieldName].type === "gallery"
+          )
+          .forEach(fieldName => {
+            if (!Array.isArray(item[fieldName].value)) {
+              const imageField = item[fieldName];
+              let path = imageField.value.path;
+
+              trimAssetField(imageField);
+
+              if (path.startsWith("/")) {
+                path = `${this.baseUrl}${path}`;
+              } else if (!path.startsWith("http")) {
+                path = `${this.baseUrl}/${path}`;
+              }
+
+              imageField.value = path;
+              images[path] = null;
+            } else {
+              const galleryField = item[fieldName];
+
+              galleryField.value.forEach(galleryImageField => {
+                let path = galleryImageField.path;
+
+                trimGalleryImageField(galleryImageField);
+
+                if (path.startsWith("/")) {
+                  path = `${this.baseUrl}${path}`;
+                } else {
+                  path = `${this.baseUrl}/${path}`;
+                }
+
+                galleryImageField.value = path;
+                images[path] = null;
+              });
+            }
+          });*/
+      });
+    });
+
+    return images;
+  }
+
+  normalizeSingletonsAssets(singletons) {
+    const assets = {};
+
+    singletons.forEach(singleton => {
+      singleton.items.forEach(item => {
+        Object.keys(item)
+          .filter(fieldName => item[fieldName].type === "asset")
+          .forEach(fieldName => {
+            const assetField = item[fieldName];
+            let path = assetField.value.path;
+
+            trimAssetField(assetField);
+
+            path = `${this.baseUrl}/storage/uploads${path}`;
+
+            assetField.value = path;
+            assets[path] = null;
+          });
+      });
+    });
+
+    return assets;
+  }
+
+  normalizeSingletonsMarkdowns(singletons, existingImages, existingAssets) {
+    const markdowns = {};
+
+    singletons.forEach(singleton => {
+      singleton.items.forEach(item => {
+        Object.keys(item)
+          .filter(fieldName => item[fieldName].type === "markdown")
+          .forEach(fieldName => {
+            const markdownField = item[fieldName];
+
+            markdowns[markdownField.value] = null;
+            extractImagesFromMarkdown(markdownField.value, existingImages);
+            extractAssetsFromMarkdown(markdownField.value, existingAssets);
+          });
+      });
+    });
+
+    return markdowns;
+  }
 };
 
 const trimAssetField = assetField => {
@@ -232,6 +387,25 @@ const createCollectionItem = (
       item[collectionFieldName] = itemField;
     }
   });
+
+  return item;
+};
+
+const createSingletonItem = (
+  singletonField,
+  singletonValue,
+  locale = null
+) => {
+  const item = {
+    lang: locale == null ? "any" : locale
+  };
+
+  if (singletonField != null && singletonField.length !== 0) {
+    if (singletonValue != null && singletonValue.length !== 0) {
+      item.field = singletonField;
+      item.value = singletonValue;
+    }
+  }
 
   return item;
 };
