@@ -228,12 +228,19 @@ module.exports = class CockpitService {
 
     singletons.forEach(singleton => {
       singleton.items.forEach(item => {
-        console.log(item);
+        //console.log(item);
+
+        // if image
         if (typeof item.value.path != 'undefined' && item.value.path) {
           if (item.value.path.startsWith("/")) {
             item.value = `${this.baseUrl}${item.value.path}`;
           } else if (!item.value.path.startsWith("http")) {
             item.value = `${this.baseUrl}/${item.value.path}`;
+          }
+        } else {
+          // if object
+          if (typeof item.value == 'object') {
+            item.value = JSON.stringify(item.value);
           }
         }
 
