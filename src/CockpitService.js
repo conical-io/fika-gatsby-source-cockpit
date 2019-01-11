@@ -240,9 +240,9 @@ module.exports = class CockpitService {
         } else if (typeof item.value == 'array' && typeof item.value[0].path != 'undefined' && item.value[0].path) {
           for (var i = 0; i < item.value.length; i++) {
             if (item.value[i].path.startsWith("/")) {
-              item.value = `${this.baseUrl}${item.value[i].path}`;
+              item.value[i].path = `${this.baseUrl}${item.value[i].path}`;
             } else if (!item[i].value.path.startsWith("http")) {
-              item.value = `${this.baseUrl}/${item.value[i].path}`;
+              item.value[i].path = `${this.baseUrl}/${item.value[i].path}`;
             }
           }
         } else {
