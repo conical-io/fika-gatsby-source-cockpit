@@ -242,7 +242,7 @@ module.exports = class CockpitService {
           }
         } else if (typeof item.value == 'object' && Array.isArray(item.value)) {
           console.log('It is an array');
-          if (typeof item.value[0].path != 'undefined' && item.value[0].path) {
+          if (typeof item.value[0].path != 'undefined' && item.value[0].path != null) {
             console.log('It has a path');
             for (var i = 0; i < item.value.length; i++) {
               console.log('Item' + i);
