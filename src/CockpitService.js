@@ -252,6 +252,10 @@ module.exports = class CockpitService {
           }
         }
 
+        if (typeof item.field != 'undefined' && item.field == 'gallery') {
+          console.log(item);
+        }
+
 
 
         /*Object.keys(item)
