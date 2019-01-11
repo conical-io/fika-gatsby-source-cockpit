@@ -240,7 +240,7 @@ module.exports = class CockpitService {
           } else if (!item.value.path.startsWith("http")) {
             item.value = `${this.baseUrl}/${item.value.path}`;
           }
-        } else if (typeof item.value == 'array') {
+        } else if (typeof item.value == 'object' && Array.isArray(item.value)) {
           console.log('It is an array');
           if (typeof item.value[0].path != 'undefined' && item.value[0].path) {
             console.log('It has a path');
