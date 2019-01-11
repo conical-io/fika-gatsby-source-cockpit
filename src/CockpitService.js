@@ -230,6 +230,9 @@ module.exports = class CockpitService {
       singleton.items.forEach(item => {
         //console.log(item);
 
+        if (typeof item.field != 'undefined' && item.field == 'gallery') {
+          console.log(item);
+        }
         // if image
         if (typeof item.value.path != 'undefined' && item.value.path) {
           if (item.value.path.startsWith("/")) {
@@ -252,9 +255,6 @@ module.exports = class CockpitService {
           }
         }
 
-        if (typeof item.field != 'undefined' && item.field == 'gallery') {
-          console.log(item);
-        }
 
 
 
