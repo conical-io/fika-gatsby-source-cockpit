@@ -240,12 +240,21 @@ module.exports = class CockpitService {
           } else if (!item.value.path.startsWith("http")) {
             item.value = `${this.baseUrl}/${item.value.path}`;
           }
-        } else if (typeof item.value == 'array' && typeof item.value[0].path != 'undefined' && item.value[0].path) {
-          for (var i = 0; i < item.value.length; i++) {
-            if (item.value[i].path.startsWith("/")) {
-              item.value[i].path = `${this.baseUrl}${item.value[i].path}`;
-            } else if (!item[i].value.path.startsWith("http")) {
-              item.value[i].path = `${this.baseUrl}/${item.value[i].path}`;
+        } else if (typeof item.value == 'array') {
+          console.log('It is an array');
+          if (typeof item.value[0].path != 'undefined' && item.value[0].path) {
+            console.log('It has a path');
+            for (var i = 0; i < item.value.length; i++) {
+              console.log('Item' + i);
+              if (item.value[i].path.startsWith("/")) {
+                console.log('It starts with a /');
+                item.value[i].path = `${this.baseUrl}${item.value[i].path}`;
+              } else if (!item[i].value.path.startsWith("http")) {
+                console.log('It does not start with a http');
+                item.value[i].path = `${this.baseUrl}/${item.value[i].path}`;
+              } else {
+                console.log('It starts with something else');
+              }
             }
           }
         } else {
