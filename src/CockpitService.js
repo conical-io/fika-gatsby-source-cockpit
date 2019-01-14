@@ -240,8 +240,7 @@ module.exports = class CockpitService {
 					} else if (!item.value.path.startsWith("http")) {
 						item.value = `${this.baseUrl}/${item.value.path}`;
 					}
-				} else if (typeof item.value == 'object' && Array.isArray(item.value)) {
-					console.log('It is an array ' + item.field);
+				} else if (typeof item.value == 'object' && Array.isArray(item.value) && item.field.indexOf("_gallery")!=-1) {
 
 					for (var i = 0; i < item.value.length; i++) {
 						console.log('Item' + i);
