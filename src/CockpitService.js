@@ -228,6 +228,11 @@ module.exports = class CockpitService {
 
 		singletons.forEach(singleton => {
 			singleton.items.forEach(item => {
+				//console.log(item);
+
+				if (typeof item.field != 'undefined' && item.field == 'gallery') {
+					console.log(item);
+				}
 				// if image
 				if (typeof item.value.path != 'undefined' && item.value.path) {
 					if (item.value.path.startsWith("/")) {
@@ -236,12 +241,20 @@ module.exports = class CockpitService {
 						item.value = `${this.baseUrl}/${item.value.path}`;
 					}
 				} else if (typeof item.value == 'object' && Array.isArray(item.value)) {
+					console.log('It is an array ' + item.field);
+
 					for (var i = 0; i < item.value.length; i++) {
+						console.log('Item' + i);
 						if (typeof item.value[i].path != 'undefined' && item.value[i].path != null) {
+							console.log('It has a path');
 							if (item.value[i].path.startsWith("/")) {
+								console.log('It starts with a /');
 								item.value[i].path = `${this.baseUrl}${item.value[i].path}`;
 							} else if (!item.value[i].path.startsWith("http")) {
+								console.log('It does not start with a http');
 								item.value[i].path = `${this.baseUrl}/${item.value[i].path}`;
+							} else {
+								console.log('It starts with something else');
 							}
 						}
 					}
@@ -252,6 +265,8 @@ module.exports = class CockpitService {
 						item.value = JSON.stringify(item.value);
 					}
 				}
+
+
 
 
 				/*Object.keys(item)
